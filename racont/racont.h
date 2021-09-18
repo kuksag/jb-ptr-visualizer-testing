@@ -35,7 +35,7 @@ namespace NRacont {
 
 
         std::pair<std::shared_ptr<TNode>, std::shared_ptr<TNode>>
-        split(std::shared_ptr<TNode> node, const T&pivot) {
+        split(std::shared_ptr<TNode> node, const T &pivot) {
             if (!node) {
                 return {nullptr, nullptr};
             }
@@ -80,6 +80,15 @@ namespace NRacont {
         Gen gen;
         std::shared_ptr<TNode> root;
 
+        T &traverse(std::shared_ptr<TNode> node, std::size_t pos) {
+            if (TNode::get_size(node->left) < pos) {
+                return traverse(node->right, pos - TNode::get_size(node->left) - 1);
+            } else if (TNode::get_size(node->left) == pos) {
+                return node->value;
+            } else {
+                return traverse(node->left, pos);
+            }
+        }
 
     public:
 
@@ -103,6 +112,11 @@ namespace NRacont {
             split2.first = merge(split2.first->left, split2.first->right);
             split1.second = merge(split2.first, split2.second);
             root = merge(split1.first, split1.second);
+        }
+
+        const T &operator()() {
+            auto pos = static_cast<std::size_t>(gen() % TNode::get_size(root));
+            return traverse(root, pos);
         }
     };
 
