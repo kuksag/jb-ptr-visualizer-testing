@@ -5,122 +5,20 @@
 #include <random>
 #include <chrono>
 #include <algorithm>
+#include <memory>
 
-namespace racont {
+namespace NRacont {
 
     template<typename T, typename Gen = std::mt19937, typename Alloc = std::allocator<T>>
-    class racont {
-
-        struct Handler {
-
-            std::size_t capacity;
-            T *data;
-
-            explicit Handler(std::size_t new_capacity = 0) : capacity(ceil_pow_2(new_capacity)) {
-                if (capacity > 0) {
-                    data = Alloc().allocate(capacity);
-                }
-            }
-
-            Handler(Handler &&) = delete;
-
-            Handler(Handler &) = delete;
-
-            Handler &operator=(Handler &) = delete;
-
-            Handler &operator=(Handler &&) = delete;
-
-            T &operator[](std::size_t i) & noexcept {
-                return data[i];
-            }
-
-            T &&operator[](std::size_t i) && noexcept {
-                return std::move(data[i]);
-            }
-
-            void swap(Handler &rhs) noexcept {
-                using std::swap;
-                swap(this->capacity, rhs.capacity);
-                swap(this->data, rhs.data);
-            }
-
-            ~Handler() {
-                if (capacity > 0) {
-                    Alloc().deallocate(data, capacity);
-                }
-            }
-
-            static std::size_t ceil_pow_2(std::size_t n) noexcept {
-                // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-                n--;
-                for (int i = 0; i <= 5; i++) {
-                    n |= n >> (1 << i);
-                }
-                n++;
-                return n;
-            }
+    class TRacont {
+        class TNode {
+            T value;
+            std::unique_ptr<TNode> left;
+            std::unique_ptr<TNode> right;
         };
 
-        std::size_t _size{0};
-        Gen gen;
-        Handler handler;
-
-    public:
-
-        explicit racont(unsigned long seed = std::chrono::high_resolution_clock::now().time_since_epoch().count()) :
-                gen(seed), handler() {
-        }
-
-        [[nodiscard]] std::size_t size() const noexcept {
-            return _size;
-        }
-
-        [[nodiscard]] std::size_t capacity() const noexcept {
-            return handler.capacity;
-        }
-
-        T &operator[](std::size_t i) & noexcept {
-            return handler[i];
-        }
-
-        T &&operator[](std::size_t i) && noexcept {
-            return std::move(handler[i]);
-        }
-
-        const T &operator()() & noexcept {
-            int pos = gen() % _size;
-            return handler[pos];
-        }
-
-        T &&operator()() && noexcept {
-            int pos = gen() % _size;
-            return std::move(handler[pos]);
-        }
-
-
-        void insert(const T &value) &{
-            insert(_size, value);
-        }
-
-        void insert(std::size_t pos, const T &value) &{
-            if (_size >= handler.capacity) {
-                Handler new_handler(_size + 1);
-                if (pos != 0) {
-                    std::uninitialized_move(handler.data, handler.data + pos, new_handler.data);
-                }
-                std::uninitialized_move(handler.data + pos, handler.data + _size,
-                                        new_handler.data + pos + 1);
-                Alloc().construct(new_handler.data + pos, value);
-                std::destroy(handler.data, handler.data + _size);
-                _size++;
-                handler.swap(new_handler);
-            } else {
-                std::copy_backward(handler.data + pos, handler.data + _size, handler.data + _size + 1);
-                handler.data[pos] = value;
-                _size++;
-            }
-        }
-
+        std::unique_ptr<TNode> root;
+        
 
     };
 
