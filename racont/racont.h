@@ -33,23 +33,22 @@ namespace NRacont {
             }
         };
 
-        std::shared_ptr<ITreap::TNode> root;
 
         std::pair<std::shared_ptr<TNode>, std::shared_ptr<TNode>>
-        split(std::shared_ptr<TNode> vertex, std::size_t pivot) {
-            if (!vertex) {
+        split(std::shared_ptr<TNode> node, const T&pivot) {
+            if (!node) {
                 return {nullptr, nullptr};
             }
-            if (vertex->value >= pivot) {
-                auto divided = split(vertex->left, pivot);
-                root->left = divided.second;
-                TNode::update(root);
-                return {divided.first, root};
+            if (node->value >= pivot) {
+                auto divided = split(node->left, pivot);
+                node->left = divided.second;
+                TNode::update(node);
+                return {divided.first, node};
             } else {
-                auto divided = split(vertex->right, pivot);
-                root->right = divided.first;
-                TNode::update(root);
-                return {root, divided.second};
+                auto divided = split(node->right, pivot);
+                node->right = divided.first;
+                TNode::update(node);
+                return {node, divided.second};
             }
         }
 
@@ -75,8 +74,12 @@ namespace NRacont {
     template<typename T, typename Gen = std::mt19937, typename Alloc = std::allocator<T>>
     class TRacont : ITreap<T> {
         using typename ITreap<T>::TNode;
+        using ITreap<T>::split;
+        using ITreap<T>::merge;
 
         Gen gen;
+        std::shared_ptr<TNode> root;
+
 
     public:
 
@@ -88,9 +91,18 @@ namespace NRacont {
         }
 
         void insert(const T &value) &{
-            auto new_node = std::allocate_shared<TNode>(Alloc(), value, gen());
-            this->root = this->merge(this->root, new_node);
+            auto new_node = std::make_shared<TNode>(value, gen());
+            auto divided = split(root, value);
+            divided.first = merge(divided.first, new_node);
+            this->root = this->merge(divided.first, divided.second);
         }
+
+//        void erase(const T &value) &{
+//            auto split1 = this->split(this->root, value);
+//            auto split2 = this->split(split1.second, value + 1);
+//            split1.second = this->merge(split2.first->left, split2.first->right);
+//            this->root = this->merge(split1.first, split1.second);
+//        }
     };
 
 }

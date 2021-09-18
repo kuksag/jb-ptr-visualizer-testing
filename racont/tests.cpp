@@ -23,10 +23,13 @@ class sequent_gen {
     int i = 0;
 public:
     sequent_gen(int) {}
+
     int operator()() {
         return i++;
     }
 };
+
+std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 
 TEST_CASE("Default init") {
     SUBCASE("Init without parameters") {
@@ -53,6 +56,25 @@ TEST_CASE("Check insert method") {
         NRacont::TRacont<int> a;
         for (int i = 0; i < 1000; i++) {
             a.insert(i);
+        }
+        CHECK(a.size() == 1000);
+    }
+    SUBCASE("Many inserts") {
+        NRacont::TRacont<int> a;
+        for (int i = 0; i < 1000; i++) {
+            a.insert(i);
+        }
+        CHECK(a.size() == 1000);
+    }
+    SUBCASE("Many random inserts") {
+        NRacont::TRacont<int> a;
+        std::vector<int> order;
+        for (int i = 0; i < 1000; i++) {
+            order.push_back(i);
+        }
+        std::shuffle(order.begin(), order.end(), rng);
+        for (int v : order) {
+            a.insert(v);
         }
         CHECK(a.size() == 1000);
     }
