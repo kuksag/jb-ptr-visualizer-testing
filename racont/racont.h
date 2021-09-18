@@ -87,6 +87,21 @@ namespace racont {
             return std::move(handler[i]);
         }
 
+        const T &operator()() & noexcept {
+            int pos = gen() % _size;
+            return handler[pos];
+        }
+
+        T &&operator()() && noexcept {
+            int pos = gen() % _size;
+            return std::move(handler[pos]);
+        }
+
+
+        void insert(const T &value) &{
+            insert(_size, value);
+        }
+
         void insert(std::size_t pos, const T &value) &{
             if (_size >= handler.capacity) {
                 Handler new_handler(_size + 1);
