@@ -13,13 +13,12 @@ namespace NRacont {
     struct ITreap {
         struct TNode {
             T value;
-            int priority;
             std::size_t size;
             std::shared_ptr<TNode> left;
             std::shared_ptr<TNode> right;
 
-            TNode(const T &value_other, int priority_other) : value(value_other), priority(priority_other), size(1),
-                                                              left(nullptr), right(nullptr) {
+            TNode(const T &value_other) : value(value_other), size(1),
+                                          left(nullptr), right(nullptr) {
             }
 
             static std::size_t get_size(const std::shared_ptr<TNode> &node) {
@@ -52,6 +51,8 @@ namespace NRacont {
             }
         }
 
+        std::mt19937 _gen;
+
         std::shared_ptr<TNode> merge(std::shared_ptr<TNode> left, std::shared_ptr<TNode> right) {
             if (!left) {
                 return right;
@@ -59,7 +60,8 @@ namespace NRacont {
             if (!right) {
                 return left;
             }
-            if (left->priority > right->priority) {
+            auto random = static_cast<std::size_t>(_gen()) % (TNode::get_size(left) + TNode::get_size(right));
+            if (random < TNode::get_size(left)) {
                 left->right = merge(left->right, right);
                 TNode::update(left);
                 return left;
@@ -69,6 +71,8 @@ namespace NRacont {
                 return right;
             }
         }
+
+        ITreap() : _gen(std::chrono::high_resolution_clock::now().time_since_epoch().count()) {}
     };
 
     template<typename T, typename Gen = std::mt19937, typename Alloc = std::allocator<T>>
@@ -100,7 +104,7 @@ namespace NRacont {
         }
 
         void insert(const T &value) &{
-            auto new_node = std::allocate_shared<TNode>(Alloc(), value, gen());
+            auto new_node = std::allocate_shared<TNode>(Alloc(), value);
             auto divided = split(root, value);
             divided.first = merge(divided.first, new_node);
             root = merge(divided.first, divided.second);
