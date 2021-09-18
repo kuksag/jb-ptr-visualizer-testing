@@ -31,6 +31,9 @@ public:
 
 std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 
+const int ITERATIONS = 1000;
+
+
 TEST_CASE("Default init") {
     SUBCASE("Init without parameters") {
         NRacont::TRacont<int, std::mt19937_64> a;
@@ -54,62 +57,89 @@ TEST_CASE("Check insert method") {
     }
     SUBCASE("Many inserts") {
         NRacont::TRacont<int> a;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < ITERATIONS; i++) {
             a.insert(i);
         }
-        CHECK(a.size() == 1000);
+        CHECK(a.size() == ITERATIONS);
     }
     SUBCASE("Many inserts") {
         NRacont::TRacont<int> a;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < ITERATIONS; i++) {
             a.insert(i);
         }
-        CHECK(a.size() == 1000);
+        CHECK(a.size() == ITERATIONS);
     }
     SUBCASE("Many random inserts") {
         NRacont::TRacont<int> a;
         std::vector<int> order;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < ITERATIONS; i++) {
+            order.push_back(i);
+        }
+        std::shuffle(order.begin(), order.end(), rng);
+        for (int v: order) {
+            a.insert(v);
+        }
+        CHECK(a.size() == ITERATIONS);
+    }
+    SUBCASE("Insert multiple times the same value") {
+        NRacont::TRacont<int> a;
+        for (int i = 0; i < ITERATIONS; i++) {
+            a.insert(0);
+        }
+        CHECK(a.size() == ITERATIONS);
+    }
+}
+
+TEST_CASE("Check erase method") {
+    SUBCASE("Small erase") {
+        NRacont::TRacont<int> a;
+        a.insert(0);
+        a.erase(0);
+        a.insert(1);
+        a.erase(1);
+        a.insert(2);
+        a.insert(3);
+        a.erase(3);
+        a.erase(2);
+    }
+    SUBCASE("Erase all") {
+        NRacont::TRacont<int> a;
+        for (int i = 0; i < ITERATIONS; i++) {
+            a.insert(i);
+        }
+        for (int i = 0; i < ITERATIONS; i++) {
+            a.erase(i);
+        }
+        CHECK(a.size() == 0);
+    }
+    SUBCASE("Erase all in random order") {
+        NRacont::TRacont<int> a;
+        for (int i = 0; i < ITERATIONS; i++) {
+            a.insert(i);
+        }
+        std::vector<int> order;
+        for (int i = 0; i < ITERATIONS; i++) {
             order.push_back(i);
         }
         std::shuffle(order.begin(), order.end(), rng);
         for (int v : order) {
-            a.insert(v);
+            a.erase(v);
         }
-        CHECK(a.size() == 1000);
+        CHECK(a.size() == 0);
+    }
+    SUBCASE("Insert and erase multiple times same values") {
+        NRacont::TRacont<int> a;
+        for (int i = 0; i < ITERATIONS; i++) {
+            a.insert(0);
+            a.insert(1);
+        }
+        CHECK(a.size() == 2 * ITERATIONS);
+        a.erase(0);
+        CHECK(a.size() == 2 * ITERATIONS - 1);
+        a.erase(0);
+        CHECK(a.size() == 2 * ITERATIONS - 2);
+        a.erase(1);
+        CHECK(a.size() == 2 * ITERATIONS - 3);
+        a.erase(1);
     }
 }
-
-//
-//TEST_CASE("Test random access") {
-//    SUBCASE("Random access on first element") {
-//        racont::racont<int> a;
-//        a.insert(0);
-//        CHECK(a() == 0);
-//    }
-//    SUBCASE("Random access to all elements") {
-//        racont::racont<int> a;
-//        a.insert(0);
-//        a.insert(1);
-//        a.insert(2);
-//        a.insert(3);
-//        a.insert(4);
-//        std::set<int> pool;
-//        while (pool.size() != a.size()) {
-//            pool.insert(a());
-//        }
-//    }
-//    SUBCASE("Sequential random") {
-//        racont::racont<int, sequent_gen> a;
-//        a.insert(0);
-//        a.insert(1);
-//        a.insert(2);
-//        a.insert(3);
-//        a.insert(4);
-//        std::vector<int> b;
-//        for (std::size_t i = 0; i < 2 * a.size(); i++) {
-//            b.push_back(a());
-//        }
-//        CHECK((b == std::vector<int>{0, 1, 2, 3, 4, 0, 1, 2, 3, 4}));
-//    }
-//}

@@ -94,15 +94,16 @@ namespace NRacont {
             auto new_node = std::make_shared<TNode>(value, gen());
             auto divided = split(root, value);
             divided.first = merge(divided.first, new_node);
-            this->root = this->merge(divided.first, divided.second);
+            root = merge(divided.first, divided.second);
         }
 
-//        void erase(const T &value) &{
-//            auto split1 = this->split(this->root, value);
-//            auto split2 = this->split(split1.second, value + 1);
-//            split1.second = this->merge(split2.first->left, split2.first->right);
-//            this->root = this->merge(split1.first, split1.second);
-//        }
+        void erase(const T &value) &{
+            auto split1 = split(root, value);
+            auto split2 = split(split1.second, value + 1);
+            split2.first = merge(split2.first->left, split2.first->right);
+            split1.second = merge(split2.first, split2.second);
+            root = merge(split1.first, split1.second);
+        }
     };
 
 }
