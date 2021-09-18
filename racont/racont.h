@@ -100,7 +100,7 @@ namespace NRacont {
         }
 
         void insert(const T &value) &{
-            auto new_node = std::make_shared<TNode>(value, gen());
+            auto new_node = std::allocate_shared<TNode>(Alloc(), value, gen());
             auto divided = split(root, value);
             divided.first = merge(divided.first, new_node);
             root = merge(divided.first, divided.second);
