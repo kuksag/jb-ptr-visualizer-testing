@@ -103,6 +103,10 @@ namespace NRacont {
             return TNode::get_size(this->root);
         }
 
+        [[nodiscard]] bool empty() const {
+            return size() == 0;
+        }
+
         void insert(const T &value) &{
             auto new_node = std::allocate_shared<TNode>(Alloc(), value);
             auto divided = split(root, value);

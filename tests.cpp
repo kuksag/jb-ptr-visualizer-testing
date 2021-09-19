@@ -47,15 +47,15 @@ std::vector<int> get_permutation(int n) {
 TEST_CASE("Default init") {
     SUBCASE("Init without parameters") {
         NRacont::TRacont<int, std::mt19937_64> a;
-        CHECK(a.size() == 0);
+        CHECK(a.empty());
     }
     SUBCASE("Init with custom seed") {
         NRacont::TRacont<int, std::mt19937_64> a(1337);
-        CHECK(a.size() == 0);
+        CHECK(a.empty());
     }
     SUBCASE("Init with custom generator") {
         NRacont::TRacont<int, test_gen> a(210918);
-        CHECK(a.size() == 0);
+        CHECK(a.empty());
     }
 }
 
@@ -106,6 +106,7 @@ TEST_CASE("Check erase method") {
         a.insert(3);
         a.erase(3);
         a.erase(2);
+        CHECK(a.empty());
     }
     SUBCASE("Erase all") {
         NRacont::TRacont<int> a;
@@ -115,7 +116,7 @@ TEST_CASE("Check erase method") {
         for (int i = 0; i < ITERATIONS; i++) {
             a.erase(i);
         }
-        CHECK(a.size() == 0);
+        CHECK(a.empty());
     }
     SUBCASE("Erase all in random order") {
         NRacont::TRacont<int> a;
@@ -125,7 +126,7 @@ TEST_CASE("Check erase method") {
         for (int v: get_permutation(ITERATIONS)) {
             a.erase(v);
         }
-        CHECK(a.size() == 0);
+        CHECK(a.empty());
     }
     SUBCASE("Insert and erase multiple times same values") {
         NRacont::TRacont<int> a;
